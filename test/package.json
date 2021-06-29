@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "cli-test"
+    "publish": "dt-publish"
   },
   "keywords": [],
   "author": "kaifeng",

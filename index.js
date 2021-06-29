@@ -12,7 +12,8 @@ const configPath = path.join(process.cwd(), "dtstack.config.js");
 // 判断是否有配置文件
 fs.exists(configPath, function (exists) {
   if (!exists) {
-    message.warning("请在根目录中新建dtstack.config.js配置文件，并写入配置");
+    message.warning("请在根目录中新建dtstack.config.js配置文件，并以JSON格式写入配置");
+    process.exit();
   } else {
     readConfigFile(configPath);
   }
@@ -22,7 +23,8 @@ fs.exists(configPath, function (exists) {
 const readConfigFile = function (configPath) {
   fs.readFile(configPath, "utf-8", function (err, data) {
     if (err) {
-      console.log(err);
+      message.error("读取配置文件失败m");
+      process.exit();
     } else {
       const config = parseConfig(data);
       if (config) {
@@ -68,6 +70,11 @@ const parseConfig = function (configData) {
  * @param {*} config
  */
 const run = function (config) {
+  console.log(`\n${config.user}@${config.host}\n`);
+
+  // 文件备份路径
+  const backupPath = config.targetPath + `_bak`;
+
   inquirer
     .prompt([
       {
@@ -91,53 +98,72 @@ const run = function (config) {
           port: 22, //SSH连接默认在22端口
         })
         .then(function () {
-          //上传网站的发布包至configs中配置的远程服务器的指定地址
-          console.log();
           message.success("服务器密码验证成功");
-          // Putting entire directories
-          const failedArr = [];
-          const sourcePath = config.sourcePath.replace(".", process.cwd());
-          ssh
-            .putDirectory(sourcePath, config.targetPath, {
-              recursive: true,
-              concurrency: 10,
-              // validate: function (itemPath) {
-              //   const baseName = path.basename(itemPath);
-              //   return (
-              //     baseName.substr(0, 1) !== "." && // do not allow dot files
-              //     baseName !== "node_modules"
-              //   ); // do not allow node_modules
-              // },
-              tick: function (localPath, remotePath, error) {
-                if (error) {
-                  failedArr.push(localPath);
-                }
-              },
-            })
-            .then(function (isSuccessful) {
-              if (failedArr.length) {
-                message.warning("**********部分失败**********");
-                console.log("失败文件为:", failed.join(", "));
-              }
-              if (isSuccessful) {
-                message.success("**********部署成功**********");
-              }
-            });
 
-          // ssh
-          //   .putFile(__dirname + "/test.html", config.targetPath)
-          //   .then(function (status) {
-          //     message.success("上传文件成功");
-          //   })
-          //   .catch((err) => {
-          //     message.error("文件传输异常");
-          //     console.error("异常原因:", err);
-          //     process.exit(0);
-          //   });
+          // 删除历史备份，备份待被替换的文件
+          ssh
+            .execCommand(`rm -rf ${backupPath} && cp -r ${config.targetPath} ${backupPath}`)
+            .then(function () {
+              console.log(`已自动备份：${backupPath}\n`);
+            })
+            .then(() => {
+              // 发起更新
+              const failedArr = [];
+              const sourcePath = config.sourcePath.replace(".", process.cwd());
+              console.log(`开始替换文件...\n`);
+              ssh
+                .putDirectory(sourcePath, config.targetPath, {
+                  recursive: true,
+                  concurrency: 10,
+                  // validate: function (itemPath) {
+                  //   const baseName = path.basename(itemPath);
+                  //   return (
+                  //     baseName.substr(0, 1) !== "." && // do not allow dot files
+                  //     baseName !== "node_modules"
+                  //   ); // do not allow node_modules
+                  // },
+                  tick: function (localPath, remotePath, error) {
+                    if (error) {
+                      failedArr.push(localPath);
+                    }
+                  },
+                })
+                .then(function (isSuccessful) {
+                  throw new Error();
+                  if (!isSuccessful || failedArr.length) {
+                    console.log("失败文件为:", failed.join(", "));
+                    // 还原
+                    rollBack(backupPath, config.targetPath);
+                  } else {
+                    console.log("文件替换完成");
+                    message.success("********* Successed **********");
+                    process.exit();
+                  }
+                })
+                .catch((err) => {
+                  message.error("ERROR：");
+                  console.error(err);
+                  // 还原
+                  rollBack(backupPath, config.targetPath);
+                });
+            });
         })
         .catch((err) => {
-          console.log("ssh连接失败:", err);
-          process.exit(0);
+          message.error("发生错误");
+          console.log(err);
+          // 还原
+          rollBack(backupPath, config.targetPath);
         });
     });
+};
+
+/**
+ * 文件回滚
+ */
+const rollBack = function (backupPath, targetPath) {
+  return ssh.execCommand(`cp -r ${backupPath} ${targetPath}`).then(function () {
+    message.warning("映射文件已自动还原");
+    message.error("********** Failed **********");
+    process.exit();
+  });
 };

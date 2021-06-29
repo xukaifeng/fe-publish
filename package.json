@@ -1,7 +1,7 @@
 {
-  "name": "shell-test",
+  "name": "publish-tool",
   "bin": {
-    "cli-test": "./index.js"
+    "dt-publish": "./index.js"
   },
   "dependencies": {
     "chalk": "^4.1.1",

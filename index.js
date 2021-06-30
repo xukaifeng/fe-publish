@@ -7,6 +7,7 @@ const inquirer = require("inquirer");
 const { NodeSSH } = require("node-ssh");
 const ssh = new NodeSSH();
 const message = require("./message");
+const ora = require("ora");
 
 const configPath = path.join(process.cwd(), "dtstack.config.js");
 // 判断是否有配置文件
@@ -111,11 +112,12 @@ const run = function (config) {
               // 发起更新
               const failedArr = [];
               const sourcePath = config.sourcePath.replace(".", process.cwd());
-              console.log(`开始替换文件...\n`);
+              console.log(`开始发布，请稍候...\n`);
+              const spinner = ora("正在上传文件").start();
               ssh
                 .putDirectory(sourcePath, config.targetPath, {
                   recursive: true,
-                  concurrency: 10,
+                  // concurrency: 10,
                   // validate: function (itemPath) {
                   //   const baseName = path.basename(itemPath);
                   //   return (
@@ -126,16 +128,20 @@ const run = function (config) {
                   tick: function (localPath, remotePath, error) {
                     if (error) {
                       failedArr.push(localPath);
+                      ora(localPath).fail();
+                    } else {
+                      spinner.text = localPath + "\n";
                     }
                   },
                 })
                 .then(function (isSuccessful) {
                   if (!isSuccessful || failedArr.length) {
+                    spinner.fail("发布失败");
                     console.log("失败文件为:", failed.join(", "));
                     // 还原
                     rollBack(backupPath, config.targetPath);
                   } else {
-                    console.log("文件替换完成");
+                    spinner.succeed("发布成功");
                     message.success("********* Successed 🐮 **********");
                     process.exit();
                   }

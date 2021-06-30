@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "publish": "dt-publish"
+    "publish": "fe-publish"
   },
   "keywords": [],
   "author": "kaifeng",

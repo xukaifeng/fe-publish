@@ -1,7 +1,7 @@
 {
-  "name": "publish-tool",
+  "name": "fe-publish",
   "bin": {
-    "dt-publish": "./index.js"
+    "fe-publish": "./index.js"
   },
   "dependencies": {
     "chalk": "^4.1.1",

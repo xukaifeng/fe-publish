@@ -70,7 +70,7 @@ const parseConfig = function (configData) {
  * @param {*} config
  */
 const run = function (config) {
-  console.log(`\n${config.user}@${config.host}\n`);
+  console.log(`${config.user}@${config.host}\n`);
 
   // 文件备份路径
   const backupPath = config.targetPath + `_bak`;
@@ -105,6 +105,7 @@ const run = function (config) {
             .execCommand(`rm -rf ${backupPath} && cp -r ${config.targetPath} ${backupPath}`)
             .then(function () {
               console.log(`已自动备份：${backupPath}\n`);
+              return;
             })
             .then(() => {
               // 发起更新
@@ -129,14 +130,13 @@ const run = function (config) {
                   },
                 })
                 .then(function (isSuccessful) {
-                  throw new Error();
                   if (!isSuccessful || failedArr.length) {
                     console.log("失败文件为:", failed.join(", "));
                     // 还原
                     rollBack(backupPath, config.targetPath);
                   } else {
                     console.log("文件替换完成");
-                    message.success("********* Successed **********");
+                    message.success("********* Successed 🐮 **********");
                     process.exit();
                   }
                 })
@@ -161,9 +161,11 @@ const run = function (config) {
  * 文件回滚
  */
 const rollBack = function (backupPath, targetPath) {
-  return ssh.execCommand(`cp -r ${backupPath} ${targetPath}`).then(function () {
-    message.warning("映射文件已自动还原");
-    message.error("********** Failed **********");
-    process.exit();
-  });
+  return ssh
+    .execCommand(`rm -rf ${targetPath} && cp -r ${backupPath} ${targetPath}`)
+    .then(function () {
+      message.warning("映射文件已自动还原");
+      message.error("********** Failed 💣 **********");
+      process.exit();
+    });
 };

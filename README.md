@@ -40,7 +40,7 @@ yarn add fe-publish
 ```
 
 ```
-npm run publish
+npm run pub
 或
 fe-publish
 ```

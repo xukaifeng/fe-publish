@@ -109,7 +109,7 @@ const run = function (config) {
     .then((res) => {
       if (res.isNeedBuild && !config.closeAutoBuild) {
         console.log();
-        const spinner = ora("开始执行打包...").start();
+        const spinner = ora("已开始自动打包，请稍候...").start();
         const ret = child_process.spawnSync("npm", ["run", "build"], {
           cwd: process.cwd(),
           stdio: "inherit",

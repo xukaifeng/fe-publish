@@ -1,13 +1,17 @@
 #!/usr/bin/env node
-const commander = require("commander");
 const fs = require("fs");
 const path = require("path");
 const process = require("process");
+const child_process = require("child_process");
+
+const ora = require("ora");
+const commander = require("commander");
 const inquirer = require("inquirer");
 const { NodeSSH } = require("node-ssh");
 const ssh = new NodeSSH();
+
 const message = require("./message");
-const ora = require("ora");
+const { errorHandle } = require("./errorHandle");
 
 const configPath = path.join(process.cwd(), "dtstack.config.js");
 // 判断是否有配置文件
@@ -73,23 +77,48 @@ const parseConfig = function (configData) {
 const run = function (config) {
   console.log(`${config.user}@${config.host}\n`);
 
+  const questionArr = [
+    {
+      type: "confirm",
+      name: "isNeedBuild",
+      message: "需要执行打包吗？",
+      default: true,
+    },
+    {
+      type: "password",
+      name: "password",
+      message: "\033[32m 请输入服务器密码？ \033[0m",
+      validate(val) {
+        if (val.trim() === "") {
+          return "密码不能为空!";
+        }
+        return true;
+      },
+    },
+  ];
+  // 判断是否关闭自动build功能
+  if (config.closeAutoBuild) {
+    questionArr.shift();
+  }
+
   // 文件备份路径
   const backupPath = config.targetPath + `_bak`;
 
   inquirer
-    .prompt([
-      {
-        type: "password",
-        name: "password",
-        message: "\033[32m 请输入服务器密码？ \033[0m",
-        validate(val) {
-          if (val.trim() === "") {
-            return "密码不能为空!";
-          }
-          return true;
-        },
-      },
-    ])
+    .prompt(questionArr)
+    .then((res) => {
+      if (res.isNeedBuild && !config.closeAutoBuild) {
+        console.log();
+        const spinner = ora("开始执行打包...").start();
+        const ret = child_process.spawnSync("npm", ["run", "build"], {
+          cwd: process.cwd(),
+          stdio: "inherit",
+        });
+        spinner.succeed("打包完成！\n");
+        console.log("开始连接服务器...");
+        return res;
+      }
+    })
     .then((res) => {
       ssh
         .connect({
@@ -101,9 +130,11 @@ const run = function (config) {
         .then(function () {
           message.success("服务器密码验证成功");
 
-          // 删除历史备份，备份待被替换的文件
+          // 删除历史备份，备份待被替换的文件，删除已有targetPath
           ssh
-            .execCommand(`rm -rf ${backupPath} && cp -r ${config.targetPath} ${backupPath}`)
+            .execCommand(
+              `rm -rf ${backupPath} && cp -r ${config.targetPath} ${backupPath} && rm -rf ${config.targetPath}`
+            )
             .then(function () {
               console.log(`已自动备份：${backupPath}\n`);
               return;
@@ -137,9 +168,9 @@ const run = function (config) {
                 .then(function (isSuccessful) {
                   if (!isSuccessful || failedArr.length) {
                     spinner.fail("发布失败");
-                    console.log("失败文件为:", failed.join(", "));
-                    // 还原
-                    rollBack(backupPath, config.targetPath);
+                    errorHandle(failed.join(", "), "失败文件为:", () => {
+                      rollBack(backupPath, config.targetPath);
+                    });
                   } else {
                     spinner.succeed("发布成功");
                     message.success("********* Successed 🐮 **********");
@@ -147,19 +178,23 @@ const run = function (config) {
                   }
                 })
                 .catch((err) => {
-                  message.error("ERROR：");
-                  console.error(err);
-                  // 还原
-                  rollBack(backupPath, config.targetPath);
+                  errorHandle(err, "Error：", () => {
+                    rollBack(backupPath, config.targetPath);
+                  });
                 });
+            })
+            .catch((err) => {
+              errorHandle(err, "Error：", () => {
+                rollBack(backupPath, config.targetPath);
+              });
             });
         })
         .catch((err) => {
-          message.error("发生错误");
-          console.log(err);
-          // 还原
-          rollBack(backupPath, config.targetPath);
+          errorHandle(false, "Error：服务器密码错误");
         });
+    })
+    .catch((err) => {
+      errorHandle(err, "发布失败");
     });
 };
 

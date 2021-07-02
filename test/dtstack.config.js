@@ -1,5 +1,5 @@
 {
-  "host": "127.0.0.1",
+  "host": "172.16.8.54",
   "user": "root",
   "sourcePath": "./dist",
   "targetPath": "/tmp/dist"

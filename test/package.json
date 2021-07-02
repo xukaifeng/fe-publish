@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "publish": "fe-publish"
+    "build": "sh ./build.sh ",
+    "pub": "fe-publish"
   },
   "keywords": [],
   "author": "kaifeng",

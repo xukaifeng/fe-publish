@@ -1,5 +1,5 @@
 # fe-publish
-使用node-ssh模块，实现一条命令将打包文件快速更新到服务器对应的路径，支持错误时回滚。
+使用node-ssh模块，实现一条命令将打包文件快速更新到服务器对应路径，可用于快速发布；支持错误回滚。
 
 ## 安装
 ```
@@ -9,13 +9,13 @@ yarn add fe-publish
 ```
 
 ## 使用
-在您的项目更目录下新建dtstack.config.js，以JSON格式配置以下配置项
+在项目根目录下新建dtstack.config.js，以JSON格式配置以下配置项:
 * host 服务器ip，必填
 * user 登录用户名，必填
 * sourcePath 本地包路径，选填、默认为`./dist`
 * targetPath 映射文件路径，必填, targetPath必须为真实已有的路径
 
-配置实例
+配置示例
 ```
 {
   "host": "127.0.0.1",
@@ -30,6 +30,10 @@ yarn add fe-publish
 "scripts": {
   "publish": "fe-publish"
 },
+```
+
+```
+npm run publish
 ```
 
 ## 注意事项

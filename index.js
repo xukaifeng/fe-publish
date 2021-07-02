@@ -81,7 +81,7 @@ const run = function (config) {
     {
       type: "confirm",
       name: "isNeedBuild",
-      message: "需要执行打包吗？",
+      message: "\033[32m 需要执行打包吗？ \033[0m",
       default: true,
     },
     {

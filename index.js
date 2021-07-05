@@ -131,11 +131,15 @@ const run = function (config) {
           message.success("服务器密码验证成功");
 
           // 删除历史备份，备份待被替换的文件，删除已有targetPath
+          let commond = ` rm -rf ${config.targetPath}`;
+          if (!config.closeRollBack) {
+            commond =
+              `rm -rf ${backupPath} && cp -r ${config.targetPath} ${backupPath} && ` + commond;
+          }
           ssh
-            .execCommand(
-              `rm -rf ${backupPath} && cp -r ${config.targetPath} ${backupPath} && rm -rf ${config.targetPath}`
-            )
+            .execCommand(commond)
             .then(function () {
+              if (config.closeRollBack) return;
               console.log(`已自动备份：${backupPath}\n`);
               return;
             })
@@ -169,6 +173,7 @@ const run = function (config) {
                   if (!isSuccessful || failedArr.length) {
                     spinner.fail("发布失败");
                     errorHandle(failed.join(", "), "失败文件为:", () => {
+                      if (config.closeRollBack) return;
                       rollBack(backupPath, config.targetPath);
                     });
                   } else {
@@ -179,12 +184,14 @@ const run = function (config) {
                 })
                 .catch((err) => {
                   errorHandle(err, "Error：", () => {
+                    if (config.closeRollBack) return;
                     rollBack(backupPath, config.targetPath);
                   });
                 });
             })
             .catch((err) => {
               errorHandle(err, "Error：", () => {
+                if (config.closeRollBack) return;
                 rollBack(backupPath, config.targetPath);
               });
             });

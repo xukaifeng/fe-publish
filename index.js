@@ -116,8 +116,8 @@ const run = function (config) {
         });
         spinner.succeed("打包完成！\n");
         console.log("开始连接服务器...");
-        return res;
       }
+      return res;
     })
     .then((res) => {
       ssh

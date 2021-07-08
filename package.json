@@ -1,6 +1,6 @@
 {
   "name": "fe-publish",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "bin": {
     "fe-publish": "./index.js"
   },

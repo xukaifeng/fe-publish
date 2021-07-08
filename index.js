@@ -28,7 +28,7 @@ fs.exists(configPath, function (exists) {
 const readConfigFile = function (configPath) {
   fs.readFile(configPath, "utf-8", function (err, data) {
     if (err) {
-      message.error("读取配置文件失败m");
+      message.error("读取配置文件失败");
       process.exit();
     } else {
       const config = parseConfig(data);

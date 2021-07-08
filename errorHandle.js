@@ -13,7 +13,7 @@ const errorHandle = (errorInfo, msg = "", rollBack = false) => {
     message.error(msg);
   }
   if (errorInfo) {
-    console.log(err);
+    console.log(errorInfo);
   }
   if (rollBack) {
     rollBack();

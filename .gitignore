@@ -1,3 +1,5 @@
 node_modules
 test/dist
 test/dtstack.config.js
+.yalc.lock
+.yalc/

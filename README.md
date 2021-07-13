@@ -1,6 +1,6 @@
 # fe-publish
 
-使用 node-ssh 模块，实现一条命令，自动打包（自动执行 npm run build）并将打包文件快速更新到服务器对应路径，可用于快速发布；支持错误回滚。
+使用 node-ssh 模块，实现一条命令，自动打包（自动执行 npm run build）并将打包文件快速更新到服务器对应路径，可用于快速发布；支持错误回滚及多环境配置。
 
 ## 安装
 
@@ -12,7 +12,7 @@ yarn add fe-publish
 
 ## 使用
 
-在项目根目录下新建 dtstack.config.js，以 JSON 格式配置以下配置项:
+在项目根目录下新建 dtstack.config.js，是一个 node 模块。以对象数组形式配置以下配置项，支持多个分组，并默认导出:
 
 - host 服务器 ip，必填
 - user 登录用户名，必填
@@ -24,12 +24,23 @@ yarn add fe-publish
 配置示例
 
 ```
-{
-  "host": "127.0.0.1",
-  "user": "root",
-  "sourcePath": "./dist",
-  "targetPath": "/tmp/dist"
-}
+module.exports = [
+  {
+    alias: "开发环境",
+    host: "127.0.0.1",
+    user: "root",
+    sourcePath: "./dist",
+    targetPath: "/data/dtstack/dtlogux/current/test",
+  },
+  // {
+  //   alias: "测试环境",
+  //   host: "127.0.0.1",
+  //   user: "root",
+  //   sourcePath: "./dist",
+  //   targetPath: "/data/dtstack/dtlogux/current/test",
+  // },
+];
+
 ```
 
 在项目中的 package.json 里添加 script

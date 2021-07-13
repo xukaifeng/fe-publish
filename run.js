@@ -10,7 +10,6 @@ const { NodeSSH } = require("node-ssh");
 const ssh = new NodeSSH();
 
 const message = require("./message");
-const notify = require("./notify");
 const { errorHandle } = require("./errorHandle");
 const { values } = require("./test/dtstack.config");
 
@@ -151,7 +150,6 @@ const run = function (configArr) {
                       rollBack(backupPath, config.targetPath);
                     });
                   } else {
-                    notify.success();
                     spinner.succeed("发布成功");
                     message.success("********* Successed 🐮 **********");
                     process.exit();

@@ -12,14 +12,13 @@ const ssh = new NodeSSH();
 
 const run = require("./run");
 const message = require("./message");
-const notify = require("./notify");
 
 const configPath = path.join(process.cwd(), "dtstack.config.js");
+console.log(`${configPath}\n`);
 // 判断是否有配置文件
 fs.exists(configPath, function (exists) {
   if (!exists) {
     message.warning("请在根目录中新建dtstack.config.js配置文件，并以JSON格式写入配置");
-    notify.error("无配置文件");
     process.exit();
   } else {
     readConfigFile(configPath);
@@ -67,7 +66,6 @@ const parseConfig = function (configArr) {
     if (errMsgArr.length) {
       message.error(`${configArr.length > 1 ? `第${i + 1}组` : ""}配置有误，请检查："`);
       message.error(`message: ${errMsgArr.join(",")}`);
-      notify.error("配置有误");
       return false;
     }
   }

@@ -1,7 +1,7 @@
 const process = require("process");
 
 const message = require("./message");
-
+const notify = require("./notify");
 /**
  * 错误处理
  * @param {*} errorInfo 错误详情
@@ -19,6 +19,7 @@ const errorHandle = (errorInfo, msg = "", rollBack = false) => {
     rollBack();
   }
   message.error("********** Failed 💣 **********");
+  notify.error(msg);
   process.exit();
 };
 

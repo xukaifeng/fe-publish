@@ -1,20 +1,22 @@
 {
-  "name": "fe-publish",
-  "version": "1.1.0",
+  "name": "fe-publish-ssh",
+  "version": "0.0.1",
   "bin": {
-    "fe-publish": "./index.js"
+    "fe-publish-ssh": "./index.js"
+  },
+  "scripts": {
+    "publish": "npm version patch"
   },
   "dependencies": {
     "chalk": "^4.1.1",
     "commander": "^7.2.0",
     "inquirer": "^8.1.1",
-    "node-notifier": "^10.0.0",
     "node-ssh": "^11.1.1",
     "ora": "^5.4.1",
     "shell.js": "^3.2.4"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:xukaifeng/fe-publish.git"
+    "url": "git@github.com:xukaifeng/fe-publish-ssh.git"
   }
 }

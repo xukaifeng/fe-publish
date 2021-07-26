@@ -101,8 +101,8 @@ const run = function (configArr) {
               });
           });
 
-          let commond = ` rm -rf ${config.targetPath}`;
           // 删除历史备份，备份待被替换的文件，删除已有targetPath
+          let commond = ` rm -rf ${config.targetPath}`;
           if (!config.closeRollBack) {
             commond =
               `rm -rf ${backupPath} && cp -r ${config.targetPath} ${backupPath} && ` + commond;

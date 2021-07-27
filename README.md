@@ -12,7 +12,7 @@ yarn add fe-publish-ssh
 
 ## 使用
 
-在项目根目录下新建 .ferc 配置文件。以 JSON 格式配置以下配置项，支持多个分组，并默认导出:
+在项目根目录下新建`.ferc`配置文件。以 JSON 格式配置以下配置项，支持多个分组，并默认导出:
 
 - host 服务器 ip，必填
 - user 登录用户名，必填
@@ -21,7 +21,7 @@ yarn add fe-publish-ssh
 - closeAutoBuild 是否需要关闭自动打包功能，选填，不传默认为 false
 - closeRollBack 是否需要关闭自动备份、错误回滚功能，选填，不传默认为 false
 
-配置示例
+.ferc 配置示例
 
 ```
 [
@@ -62,4 +62,4 @@ fe-publish
 
 ## 注意事项
 
-自动自动备份、错误回滚功能默认启用，此时 targetPath 必须为一个真实路径，如/tmp/dist，必须要有 dist 这个目录；
+自动备份、错误回滚功能默认启用，此时 targetPath 必须为一个真实路径，如/tmp/dist，必须要有 dist 这个目录；

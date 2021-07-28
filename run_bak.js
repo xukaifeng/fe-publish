@@ -18,11 +18,11 @@ const { errorHandle } = require("./errorHandle");
  */
 const run = function (configArr) {
   let config = {};
-  let choice = []; // 多环境情况，inquirer.prompt选项
+  let multiEnvOptions = []; // 多环境情况，inquirer.prompt选项
   let backupPath; // 备份路径
 
   if (configArr.length > 1) {
-    choice = [
+    multiEnvOptions = [
       {
         type: "list",
         name: "index",
@@ -39,7 +39,7 @@ const run = function (configArr) {
       message: "\033[32m 需要执行打包吗？ \033[0m",
       default: true,
     },
-    ...choice,
+    ...multiEnvOptions,
     {
       type: "password",
       name: "password",
@@ -53,7 +53,7 @@ const run = function (configArr) {
     },
   ];
 
-  // 判断是否关闭自动build功能
+  // close auto build
   if (config.closeAutoBuild) {
     questionArr.shift();
   }
@@ -63,21 +63,15 @@ const run = function (configArr) {
     .then((res) => {
       config = configArr[res.index || 0];
       backupPath = config.targetPath + `_bak`;
-      console.log(`${config.alias || ""}  ${config.user}@${config.host}\n`);
+      console.log(`${config.alias || ""}  ${config.user}@${config.host}`);
 
       if (res.isNeedBuild && !config.closeAutoBuild) {
-        console.log();
-        const spinner = ora("已开始自动打包，请稍候...").start();
-        const ret = child_process.spawnSync("npm", ["run", "build"], {
-          cwd: process.cwd(),
-          stdio: "inherit",
-        });
-        spinner.succeed("打包完成！\n");
-        console.log("开始连接服务器...");
+        autoBuild();
       }
       return res;
     })
     .then((res) => {
+      console.log("开始连接服务器...");
       console.log(`${config.user}@${config.host}\n`);
       ssh
         .connect({
@@ -101,8 +95,8 @@ const run = function (configArr) {
               });
           });
 
-          // 删除历史备份，备份待被替换的文件，删除已有targetPath
           let commond = ` rm -rf ${config.targetPath}`;
+          // 删除历史备份，备份待被替换的文件，删除已有targetPath
           if (!config.closeRollBack) {
             commond =
               `rm -rf ${backupPath} && cp -r ${config.targetPath} ${backupPath} && ` + commond;
@@ -123,14 +117,6 @@ const run = function (configArr) {
               ssh
                 .putDirectory(sourcePath, config.targetPath, {
                   recursive: true,
-                  // concurrency: 10,
-                  // validate: function (itemPath) {
-                  //   const baseName = path.basename(itemPath);
-                  //   return (
-                  //     baseName.substr(0, 1) !== "." && // do not allow dot files
-                  //     baseName !== "node_modules"
-                  //   ); // do not allow node_modules
-                  // },
                   tick: function (localPath, remotePath, error) {
                     if (error) {
                       failedArr.push(localPath);
@@ -174,6 +160,19 @@ const run = function (configArr) {
     .catch((err) => {
       errorHandle(err, "发布失败");
     });
+};
+
+/**
+ * 执行打包
+ */
+const autoBuild = () => {
+  console.log();
+  const spinner = ora("已开始自动打包，请稍候...").start();
+  child_process.spawnSync("npm", ["run", "build"], {
+    cwd: process.cwd(),
+    stdio: "inherit",
+  });
+  spinner.succeed("打包完成！\n");
 };
 
 /**

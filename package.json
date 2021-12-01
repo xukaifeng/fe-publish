@@ -1,6 +1,6 @@
 {
   "name": "fe-publish-ssh",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "bin": {
     "fe-publish-ssh": "./src/index.js"
   },

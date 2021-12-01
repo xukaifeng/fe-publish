@@ -1,6 +1,5 @@
 node_modules
-test/dist
-test/dtstack.config.js
+/example
 .DS_Store
 .yalc.lock
 .yalc/

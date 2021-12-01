@@ -1,0 +1,9 @@
+[
+  {
+    "name": "开发环境",
+    "host": "172.16.8.54",
+    "user": "root",
+    "sourcePath": "./dist",
+    "targetPath": "/temp/dist"
+  }
+]

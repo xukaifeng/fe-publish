@@ -20,13 +20,15 @@ const run = function (configArr) {
   let config = {};
   let multiEnvOptions = []; // 多环境情况，inquirer.prompt选项
   let backupPath; // 备份路径
+  let spinner;
+  const errMsgArr = [];
 
   if (configArr.length > 1) {
     multiEnvOptions = [
       {
         type: "list",
         name: "index",
-        choices: configArr.map((item, index) => ({ name: item.alias, value: index })),
+        choices: configArr.map((item, index) => ({ name: item.name, value: index })),
         message: "\033[32m 请选择发布环境？ \033[0m",
         default: 0,
       },
@@ -60,19 +62,21 @@ const run = function (configArr) {
 
   inquirer
     .prompt(questionArr)
+    // 自动打包
     .then((res) => {
       config = configArr[res.index || 0];
       backupPath = config.targetPath + `_bak`;
-      console.log(`${config.alias || ""}  ${config.user}@${config.host}`);
+      message.info(`\n即将进行【${config.name || ""}】的部署\n`);
 
       if (res.isNeedBuild && !config.closeAutoBuild) {
         autoBuild();
       }
       return res;
     })
+    // 服务器链接
     .then((res) => {
-      console.log("开始连接服务器...");
-      console.log(`${config.user}@${config.host}\n`);
+      message.info("开始连接服务器...");
+      message.info(`${config.user}@${config.host}\n`);
       return ssh.connect({
         host: config.host,
         username: config.user,
@@ -80,6 +84,7 @@ const run = function (configArr) {
         port: 22, //SSH连接默认在22端口
       });
     })
+    // 自动备份
     .then(
       () => {
         message.success("服务器密码验证成功");
@@ -99,51 +104,56 @@ const run = function (configArr) {
         let commond = ` rm -rf ${config.targetPath}`;
         // 删除历史备份，备份待被替换的文件，删除已有targetPath
         if (!config.closeRollBack) {
-          commond =
-            `rm -rf ${backupPath} && cp -r ${config.targetPath} ${backupPath} && ` + commond;
+          return ssh.execCommand(
+            `rm -rf ${backupPath} && cp -r ${config.targetPath} ${backupPath}`
+          );
         }
-        return ssh.execCommand(commond);
+        return null;
       },
       () => {
         errorHandle(false, "Error：服务器密码错误");
       }
     )
+    // 文件上传
     .then(() => {
-      console.log(`已自动备份：${backupPath}\n`);
+      message.info(`已自动备份：${backupPath}\n`);
+
       // 发起更新
-      const failedArr = [];
       const sourcePath = config.sourcePath.replace(".", process.cwd());
-      console.log(`开始发布，请稍候...\n`);
-      const spinner = ora("正在上传文件").start();
-      ssh
-        .putDirectory(sourcePath, config.targetPath, {
-          recursive: true,
-          tick: function (localPath, remotePath, error) {
-            if (error) {
-              failedArr.push(localPath);
-              ora(localPath).fail();
-            } else {
-              spinner.text = localPath + "\n";
-            }
-          },
-        })
-        .then(function (isSuccessful) {
-          if (!isSuccessful || failedArr.length) {
-            spinner.fail("发布失败");
-            errorHandle(failed.join(", "), "失败文件为:", () => {
-              if (config.closeRollBack) return;
-              rollBack(backupPath, config.targetPath);
-            });
+      message.info(`开始发布，请稍候...\n`);
+      spinner = ora("正在上传文件").start();
+      return ssh.putDirectory(sourcePath, `${config.targetPath}_temp_`, {
+        recursive: true,
+        tick: function (localPath, remotePath, error) {
+          if (error) {
+            errMsgArr.push(localPath);
+            ora(localPath).fail();
           } else {
-            spinner.succeed("发布成功");
-            message.success("********* Successed 🐮 **********");
-            process.exit();
+            spinner.text = localPath + "\n";
           }
-        });
+        },
+      });
+    })
+    // 文件替换
+    .then(function (isSuccessful) {
+      if (!isSuccessful || errMsgArr.length) {
+        spinner.fail("发布失败");
+        errorHandle(errMsgArr.join("\n"), "发布失败");
+      } else {
+        return ssh.execCommand(
+          `rm -rf ${config.targetPath} && mv ${config.targetPath}_temp_ ${config.targetPath}`
+        );
+      }
+    })
+    .then((res) => {
+      spinner.succeed("发布成功");
+      message.success("********* Successed 🐮 **********");
+      process.exit();
     })
     .catch((err) => {
       errorHandle(err, "发布失败", () => {
         if (config.closeRollBack) return;
+        a;
         rollBack(backupPath, config.targetPath);
       });
     });
@@ -169,7 +179,7 @@ const rollBack = function (backupPath, targetPath) {
   return ssh
     .execCommand(`rm -rf ${targetPath} && cp -r ${backupPath} ${targetPath}`)
     .then(function () {
-      message.warning("映射文件已自动还原");
+      message.warning("文件已自动回滚");
       message.error("********** Failed 💣 **********");
       process.exit();
     });

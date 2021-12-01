@@ -1,5 +1,9 @@
 const chalk = require("chalk");
 
+const info = (msg) => {
+  console.log(msg);
+};
+
 const success = (msg) => {
   console.log(chalk.green(`\n✔ ${msg}`));
   console.log();
@@ -15,6 +19,7 @@ const warning = (msg) => {
 };
 
 module.exports = {
+  info,
   success,
   warning,
   error,

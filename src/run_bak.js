@@ -26,7 +26,7 @@ const run = function (configArr) {
       {
         type: "list",
         name: "index",
-        choices: configArr.map((item, index) => ({ name: item.alias, value: index })),
+        choices: configArr.map((item, index) => ({ name: item.name, value: index })),
         message: "\033[32m 请选择发布环境？ \033[0m",
         default: 0,
       },
@@ -63,7 +63,7 @@ const run = function (configArr) {
     .then((res) => {
       config = configArr[res.index || 0];
       backupPath = config.targetPath + `_bak`;
-      console.log(`${config.alias || ""}  ${config.user}@${config.host}`);
+      console.log(`${config.name || ""}  ${config.user}@${config.host}`);
 
       if (res.isNeedBuild && !config.closeAutoBuild) {
         autoBuild();

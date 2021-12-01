@@ -14,7 +14,7 @@ const run = require("./run");
 const message = require("./message");
 
 const configPath = path.join(process.cwd(), ".ferc");
-console.log(`${configPath}\n`);
+
 // 判断是否有配置文件
 fs.exists(configPath, function (exists) {
   if (!exists) {
@@ -34,7 +34,9 @@ const readConfigFile = function (configPath) {
     } else {
       const tempArr = parseConfig(content);
       if (tempArr) {
-        console.log(tempArr);
+        tempArr.forEach((item, index) => {
+          console.log(`【${item.name}】${item.host}${tempArr.length - 1 === index ? "\n" : ""}`);
+        });
         run(tempArr);
       } else {
         process.exit();
@@ -72,7 +74,7 @@ const parseConfig = function (configString) {
         // 默认为dist文件夹
         configArr[i].sourcePath = "./dist";
       }
-      configArr[i].alias = configArr[i].alias || configArr[i].host;
+      configArr[i].name = configArr[i].name || configArr[i].host;
       if (errMsgArr.length) {
         message.error(`${configArr.length > 1 ? `第${i + 1}组` : ""}配置有误，请检查："`);
         message.error(`message: ${errMsgArr.join(",")}`);

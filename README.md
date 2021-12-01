@@ -14,6 +14,7 @@ yarn add fe-publish-ssh
 
 在项目根目录下新建`.ferc`配置文件。以 JSON 格式配置以下配置项，支持多个分组，并默认导出:
 
+- name 配置名称
 - host 服务器 ip，必填
 - user 登录用户名，必填
 - sourcePath 本地包路径，选填、默认为`./dist`
@@ -26,14 +27,14 @@ yarn add fe-publish-ssh
 ```
 [
   {
-    "alias": "开发环境",
+    "name": "开发环境",
     "host": "127.0.0.2",
     "user": "root",
     "sourcePath": "./dist",
     "targetPath": "/test"
   },
   {
-    "alias": "测试环境",
+    "name": "测试环境",
     "host": "127.0.0.1",
     "user": "root",
     "sourcePath": "./dist",

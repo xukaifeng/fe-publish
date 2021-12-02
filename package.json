@@ -1,20 +1,31 @@
 {
   "name": "fe-publish-ssh",
   "version": "0.0.3",
+  "description": "fe-publish-ssh，让部署更简单",
+  "main": "lib/service.js",
   "bin": {
-    "fe-publish-ssh": "./src/index.js"
+    "fe-publish-ssh": "./bin/fe-publish.js"
   },
+  "author": {
+    "name": "kaifeng"
+  },
+  "keywords": [
+    "cli"
+  ],
   "scripts": {
     "publish": "npm version patch"
   },
   "dependencies": {
+    "archiver": "^5.3.0",
     "chalk": "^4.1.1",
     "commander": "^7.2.0",
+    "dayjs": "^1.10.7",
     "inquirer": "^8.1.1",
-    "node-ssh": "^11.1.1",
-    "ora": "^5.4.1",
-    "shell.js": "^3.2.4"
+    "minimist": "^1.2.5",
+    "node-ssh": "^12.0.2",
+    "ora": "^5.4.1"
   },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git@github.com:xukaifeng/fe-publish-ssh.git"

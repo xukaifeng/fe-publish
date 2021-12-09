@@ -82,6 +82,7 @@ const parseConfig = function (configString) {
       }
     }
   } catch (error) {
+    console.log(".ferc配置文件，配置格式有误");
     return false;
   }
 

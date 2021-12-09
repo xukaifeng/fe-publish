@@ -153,7 +153,6 @@ const run = function (configArr) {
     .catch((err) => {
       errorHandle(err, "发布失败", () => {
         if (config.closeRollBack) return;
-        a;
         rollBack(backupPath, config.targetPath);
       });
     });

@@ -1,10 +1,10 @@
 {
   "name": "fe-publish-ssh",
-  "version": "0.0.3",
+  "version": "0.0.2",
   "description": "fe-publish-ssh，让部署更简单",
   "main": "lib/service.js",
   "bin": {
-    "fe-publish-ssh": "./bin/fe-publish.js"
+    "fe-publish-ssh": "./src/index.js"
   },
   "author": {
     "name": "kaifeng"
@@ -13,7 +13,14 @@
     "cli"
   ],
   "scripts": {
-    "publish": "npm version patch"
+    "publish": "npm version patch",
+    "async": "sudo yalc push",
+    "watch": "nodemon --ignore dist/ --ignore node_modules/ --watch ./ -C -e js,ts,tsx,scss --debug -x 'npm run async'"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:xukaifeng/fe-publish-ssh.git"
   },
   "dependencies": {
     "archiver": "^5.3.0",
@@ -25,9 +32,7 @@
     "node-ssh": "^12.0.2",
     "ora": "^5.4.1"
   },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:xukaifeng/fe-publish-ssh.git"
+  "devDependencies": {
+    "nodemon": "^2.0.15"
   }
 }

@@ -4,7 +4,7 @@
   "description": "fe-publish-ssh，让部署更简单",
   "main": "lib/service.js",
   "bin": {
-    "fe-publish-ssh": "./src/index.js"
+    "yc": "./bin/fe-publish.js"
   },
   "author": {
     "name": "kaifeng"
@@ -25,9 +25,9 @@
   "dependencies": {
     "archiver": "^5.3.0",
     "chalk": "^4.1.1",
-    "commander": "^7.2.0",
+    "commander": "^8.3.0",
     "dayjs": "^1.10.7",
-    "inquirer": "^8.1.1",
+    "inquirer": "^8.2.0",
     "minimist": "^1.2.5",
     "node-ssh": "^12.0.2",
     "ora": "^5.4.1"
